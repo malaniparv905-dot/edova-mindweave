@@ -23,6 +23,7 @@ export const ProgressView = () => {
   const [selectedTopic, setSelectedTopic] = useState("");
   const [score, setScore] = useState(50);
   const [confidence, setConfidence] = useState(50);
+  const [isDemoData, setIsDemoData] = useState(false);
   
   // AI Chatbot state
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
@@ -39,13 +40,20 @@ export const ProgressView = () => {
       .from('study_sessions')
       .select('completed');
 
-    if (sessions) {
+    if (sessions && sessions.length > 0) {
       const total = sessions.length;
       const completed = sessions.filter(s => s.completed).length;
-      setCompletionRate(total > 0 ? Math.round((completed / total) * 100) : 0);
+      setCompletionRate(Math.round((completed / total) * 100));
+      setIsDemoData(false);
+    } else {
+      // Show demo completion rate when no data
+      setCompletionRate(65);
+      setIsDemoData(true);
     }
 
     const last5Days = [];
+    let hasRealData = false;
+    
     for (let i = 4; i >= 0; i--) {
       const date = subDays(new Date(), i);
       const dateStr = format(date, 'yyyy-MM-dd');
@@ -57,10 +65,25 @@ export const ProgressView = () => {
         .lt('created_at', `${dateStr}T23:59:59`);
 
       const totalXP = logs?.reduce((sum, log) => sum + log.amount, 0) || 0;
+      if (totalXP > 0) hasRealData = true;
       last5Days.push({ date: format(date, 'MMM dd'), xp: totalXP });
     }
     
-    setDailyXP(last5Days);
+    // If no real data, show demo data
+    if (!hasRealData) {
+      const demoData = [
+        { date: format(subDays(new Date(), 4), 'MMM dd'), xp: 120 },
+        { date: format(subDays(new Date(), 3), 'MMM dd'), xp: 80 },
+        { date: format(subDays(new Date(), 2), 'MMM dd'), xp: 200 },
+        { date: format(subDays(new Date(), 1), 'MMM dd'), xp: 150 },
+        { date: format(new Date(), 'MMM dd'), xp: 100 }
+      ];
+      setDailyXP(demoData);
+      setIsDemoData(true);
+    } else {
+      setDailyXP(last5Days);
+      setIsDemoData(false);
+    }
   };
 
   const loadTopics = async () => {
@@ -211,12 +234,19 @@ export const ProgressView = () => {
     }
   };
 
-  const maxXP = Math.max(...dailyXP.map(d => d.xp), 1);
+  const maxXP = dailyXP.length > 0 ? Math.max(...dailyXP.map(d => d.xp), 1) : 1;
 
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h3 className="text-xl font-bold mb-4">Overall Completion</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold">Overall Completion</h3>
+          {isDemoData && (
+            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+              Demo Data
+            </span>
+          )}
+        </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-2xl font-bold text-primary">{completionRate}%</span>
@@ -227,10 +257,17 @@ export const ProgressView = () => {
 
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold flex items-center gap-2">
-            <BarChart className="w-5 h-5 text-primary" />
-            Daily XP (Last 5 Days)
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <BarChart className="w-5 h-5 text-primary" />
+              Daily XP (Last 5 Days)
+            </h3>
+            {isDemoData && (
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                Demo Data
+              </span>
+            )}
+          </div>
           <Button onClick={() => setShowAssessment(!showAssessment)} variant="outline" size="sm">
             <ClipboardList className="w-4 h-4 mr-2" />
             Log Assessment

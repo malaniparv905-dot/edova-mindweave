@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Calendar, CheckCircle2, Circle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Calendar, CheckCircle2, Circle, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -22,6 +23,7 @@ interface StudySession {
 export const PlannerView = () => {
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [loading, setLoading] = useState(false);
+  const [completionRate, setCompletionRate] = useState(0);
 
   useEffect(() => {
     loadSessions();
@@ -47,6 +49,10 @@ export const PlannerView = () => {
 
     if (!error && data) {
       setSessions(data as any);
+      // Calculate completion rate
+      const total = data.length;
+      const completed = data.filter(s => s.completed).length;
+      setCompletionRate(total > 0 ? Math.round((completed / total) * 100) : 0);
     }
   };
 
@@ -79,7 +85,6 @@ export const PlannerView = () => {
 
       toast.success("+100 XP earned!");
       loadSessions();
-      window.location.reload(); // Refresh to update XP in header
     } catch (error) {
       console.error(error);
       toast.error("Failed to complete session");
@@ -173,6 +178,35 @@ export const PlannerView = () => {
           {loading ? "Generating..." : "Generate New Plan"}
         </Button>
       </div>
+
+      {/* Progress Graph Section */}
+      <Card className="p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="w-5 h-5 text-primary" />
+          <h3 className="text-xl font-bold">Study Progress</h3>
+        </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Completion Rate</span>
+            <span className="text-2xl font-bold text-primary">{completionRate}%</span>
+          </div>
+          <Progress value={completionRate} className="h-3" />
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="text-center p-3 bg-muted/50 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">
+                {sessions.filter(s => s.completed).length}
+              </div>
+              <div className="text-muted-foreground">Completed</div>
+            </div>
+            <div className="text-center p-3 bg-muted/50 rounded-lg">
+              <div className="text-2xl font-bold text-orange-600">
+                {sessions.filter(s => !s.completed).length}
+              </div>
+              <div className="text-muted-foreground">Pending</div>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       <div className="space-y-3">
         {sessions.length === 0 ? (
