@@ -14,7 +14,201 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      assessments: {
+        Row: {
+          confidence_level: number
+          created_at: string | null
+          id: string
+          score: number
+          topic_id: string
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          confidence_level: number
+          created_at?: string | null
+          id?: string
+          score: number
+          topic_id: string
+          user_id: string
+          xp_earned: number
+        }
+        Update: {
+          confidence_level?: number
+          created_at?: string | null
+          id?: string
+          score?: number
+          topic_id?: string
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_sessions: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          scheduled_date: string
+          session_type: string
+          topic_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          scheduled_date: string
+          session_type: string
+          topic_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          scheduled_date?: string
+          session_type?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_sessions_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subjects: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      topics: {
+        Row: {
+          confidence_level: number | null
+          created_at: string | null
+          id: string
+          last_studied: string | null
+          name: string
+          performance_score: number | null
+          priority_score: number | null
+          subject_id: string
+        }
+        Insert: {
+          confidence_level?: number | null
+          created_at?: string | null
+          id?: string
+          last_studied?: string | null
+          name: string
+          performance_score?: number | null
+          priority_score?: number | null
+          subject_id: string
+        }
+        Update: {
+          confidence_level?: number | null
+          created_at?: string | null
+          id?: string
+          last_studied?: string | null
+          name?: string
+          performance_score?: number | null
+          priority_score?: number | null
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topics_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
+          created_at: string | null
+          daily_study_hours: number | null
+          deadline_date: string | null
+          id: string
+          last_visited_screen: string | null
+          updated_at: string | null
+          user_id: string
+          xp: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          daily_study_hours?: number | null
+          deadline_date?: string | null
+          id?: string
+          last_visited_screen?: string | null
+          updated_at?: string | null
+          user_id: string
+          xp?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          daily_study_hours?: number | null
+          deadline_date?: string | null
+          id?: string
+          last_visited_screen?: string | null
+          updated_at?: string | null
+          user_id?: string
+          xp?: number | null
+        }
+        Relationships: []
+      }
+      xp_logs: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          source: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
